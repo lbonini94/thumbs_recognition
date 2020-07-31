@@ -32,37 +32,35 @@ if args["mode"] is None:
 if args["ip"] is not None:
     try:
         # address = "http://10.0.0.101:8080/video" # Your address might be different
+        high_resolution = True
         address = args['ip']
         vidcap = cv2.VideoCapture(address)
     except Exception as e:
         print('ERROR: ', e)
         print('Try again with something like: http://10.0.0.101:8080/video')
-
+        exit(0)
 # Main or secondary camera
 elif args["camera"] is None:
     print('Standard Camera: 0')
+    high_resolution = False
     vidcap = cv2.VideoCapture(0)
-else:
-    try:
-        vidcap = cv2.VideoCapture(args["camera"])
-    except Exception as e:
-        print('ERROR: ', e)
-    
-    finally:
-        print('Trying main camera...')
-        vidcap = cv2.VideoCapture(0)
-    
-   
+# else:
+#     try:
+#         vidcap = cv2.VideoCapture(args["camera"])
+#     except Exception as e:
+#         print('ERROR: ', e)
+#         exit(0)
+      
 # Load model
+print('loading model')
 model = load_model(os.path.join("./dumps/", "model.h5"))
 label2text = joblib.load(os.path.join("./dumps/", "label2text.pkl"))
-
+        
 # Aux Variables
 first_frame = None
 tt = 0
 frame_count = 0
 
-#Loop
 while True:
     status, frame = vidcap.read()
     if not status:
@@ -119,19 +117,36 @@ while True:
         except Exception as e:
             bb_text = "no hand"
         
-        utils.draw_text_with_backgroud(frame, bb_text, x=start_coords[0], y=start_coords[1], font_scale=1.2)
-        tt += time.time() - tik
-        fps = round(frame_count / tt, 2)
-        main_text = "Running..." + f"   fps: {fps}"
+        if high_resolution:
+            utils.draw_text_with_backgroud(frame, bb_text, x=start_coords[0], y=start_coords[1], font_scale=1.2)
+            tt += time.time() - tik
+            fps = round(frame_count / tt, 2)
+            main_text = "Running..." + f"   fps: {fps}"
 
-        utils.draw_text_with_backgroud(frame, main_text, x=15, y=25, font_scale=1., thickness=2)
-        utils.draw_text_with_backgroud(frame, "Instructions for better results:", x=15, y=65, font_scale=1., thickness=2)
-        utils.draw_text_with_backgroud(frame, "- Place your hand completely inside the window", x=15, y=115, font_scale=1., thickness=2)
-        utils.draw_text_with_backgroud(frame, "- Place your hand close to window", x=15, y=165, font_scale=1., thickness=2)
-        utils.draw_text_with_backgroud(frame, "- Press Q to exit", x=15, y=215, font_scale=1., thickness=2)
+            utils.draw_text_with_backgroud(frame, main_text, x=15, y=25, font_scale=1., thickness=2)
+            utils.draw_text_with_backgroud(frame, "Instructions for better results:", x=15, y=65, font_scale=1., thickness=2)
+            utils.draw_text_with_backgroud(frame, "- Place your hand completely inside the window", x=15, y=115, font_scale=1., thickness=2)
+            utils.draw_text_with_backgroud(frame, "- Place your hand close to window", x=15, y=165, font_scale=1., thickness=2)
+            utils.draw_text_with_backgroud(frame, "- Press Q to exit", x=15, y=215, font_scale=1., thickness=2)
+        else:
+            utils.draw_text_with_backgroud(frame, bb_text, x=start_coords[0], y=start_coords[1], font_scale=0.6)
+            tt += time.time() - tik
+            fps = round(frame_count / tt, 2)
+            main_text = "Running..." + f"   fps: {fps}"
+
+            utils.draw_text_with_backgroud(frame, main_text, x=15, y=25, font_scale=.5, thickness=1)
+            utils.draw_text_with_backgroud(frame, "Instructions for better results:", x=15, y=45, font_scale=.5, thickness=1)
+            utils.draw_text_with_backgroud(frame, "- Place your hand inside the window", x=15, y=65, font_scale=.5, thickness=1)
+            utils.draw_text_with_backgroud(frame, "- Place your hand close to window", x=15, y=85, font_scale=.5, thickness=1)
+            utils.draw_text_with_backgroud(frame, "- Press Q to exit", x=15, y=105, font_scale=.5, thickness=1)
     else:
-        main_text = "Wait 10 seconds and ensure that the background behind the window doesn't change"
-        utils.draw_text_with_backgroud(frame, main_text, x=15, y=30, font_scale=0.9, thickness=2)
+        if high_resolution:
+            main_text = "Wait 10 seconds and ensure that the background behind the window doesn't change"
+            utils.draw_text_with_backgroud(frame, main_text, x=15, y=30, font_scale=0.9, thickness=2)
+        else:
+            main_text = "Wait 10 seconds and ensure that the background behind the window doesn't change"
+            utils.draw_text_with_backgroud(frame, main_text, x=15, y=30, font_scale=0.4, thickness=1)
+
     
     # cv2.namedWindow('Thumb Recognition', cv2.WINDOW_NORMAL)
     # cv2.resizeWindow("Thumb Recognition", 1200, 800)
