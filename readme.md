@@ -40,5 +40,5 @@ lbonini94/thumbs_recognition /usr/local/bin/python app.py -ip 'http://10.0.0.101
 ### To-do
 
 - [x] Pre-trained CNN model for thumbs up and down (plus: left and right)
-- [ ] Share webcam device with docker container 
 - [ ] Train model again with different parameters and new pictures
+- [ ] Share webcam device with docker container 
